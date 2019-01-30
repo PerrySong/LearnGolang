@@ -920,3 +920,191 @@ func Pic(dx, dy int) [][]uint8 {
     return res
 }
 ```
+
+# Maps
+```go
+type Vertex struct {
+	Lat, Long float64
+}
+
+var m map[string]Vertex
+
+func main() {
+	m = make(map[string]Vertex)
+	m["Bell Labs"] = Vertex{
+		40.68433, -74.39967,
+	}
+	fmt.Println(m["Bell Labs"])
+}
+// {40.68433 -74.39967}
+```
+A map maps keys to values.
+
+The zero value of a map is nil. A nil map has no keys, nor can keys be added.
+
+The make function returns a map of the given type, initialized and ready for use.
+
+# Map literals
+```go
+type Vertex struct {
+	Lat, Long float64
+}
+
+var m = map[string]Vertex{
+	"Bell Labs": Vertex{
+		40.68433, -74.39967,
+	},
+	"Google": Vertex{
+		37.42202, -122.08408,
+	},
+}
+
+func main() {
+	fmt.Println(m)
+}
+// map[Bell Labs:{40.68433 -74.39967} Google:{37.42202 -122.08408}]
+```
+Map literals are like struct literals, but the keys are required.
+
+If the top-level type is just a type name, you can omit it from the elements of the literal.
+
+```go
+type Vertex struct {
+	Lat, Long float64
+}
+
+var m = map[string]Vertex{
+	"Bell Labs": {40.68433, -74.39967},
+	"Google":    {37.42202, -122.08408},
+}
+
+```
+
+
+# Mutating Maps
+Insert or update an element in map m:
+```go
+m[key] = elem
+```
+Retrieve an element:
+```go
+elem = m[key]
+```
+Delete an element:
+```go
+delete(m, key)
+```
+Test that a key is present with a two-value assignment:
+```go
+elem, ok = m[key]
+```
+If key is in m, ok is true. If not, ok is false.
+
+If key is not in the map, then elem is the zero value for the map's element type.
+
+Note: If elem or ok have not yet been declared you could use a short declaration form:
+```go
+elem, ok := m[key]
+```
+
+# Function values
+
+```go
+func compute(fn func(float64, float64) float64) float64 {
+	return fn(3, 4)
+}
+
+func main() {
+	hypot := func(x, y float64) float64 {
+		return math.Sqrt(x*x + y*y)
+	}
+	fmt.Println(hypot(5, 12))
+
+	fmt.Println(compute(hypot))
+	fmt.Println(compute(math.Pow))
+}
+// 13
+// 5
+// 81
+```
+
+Functions are values too. They can be passed around just like other values.
+
+Function values may be used as function arguments and return values.
+
+
+# Function closures
+
+```go
+func adder() func(int) int {
+	sum := 0
+	return func(x int) int {
+		sum += x
+		return sum
+	}
+}
+
+func main() {
+	pos, neg := adder(), adder()
+	for i := 0; i < 10; i++ {
+		fmt.Println(
+			pos(i),
+			neg(-2*i),
+		)
+	}
+}
+// 0 0
+// 1 -2
+// 3 -6
+// 6 -12
+// 10 -20
+// 15 -30
+// 21 -42
+// 28 -56
+// 36 -72
+// 45 -90
+```
+
+Go functions may be closures. A closure is a function value that references variables from outside its body. The function may access and assign to the referenced variables; in this sense the function is "bound" to the variables.
+
+For example, the adder function returns a closure. Each closure is bound to its own sum variable.
+
+
+# Exercise: Fibonacci closure
+
+Let's have some fun with functions.
+
+Implement a fibonacci function that returns a function (a closure) that returns successive fibonacci numbers (0, 1, 1, 2, 3, 5, ...).
+
+
+```go
+// fibonacci is a function that returns
+// a function that returns an int.
+func fibonacci() func() int {
+	first := 0
+	second := 1
+	return func() int {
+		tmp := second
+		second = first + second
+		first = tmp
+		return first
+	}
+}
+
+func main() {
+	f := fibonacci()
+	for i := 0; i < 10; i++ {
+		fmt.Println(f())
+	}
+}
+// 1
+// 1
+// 2
+// 3
+// 5
+// 8
+// 13
+// 21
+// 34
+// 55
+```
